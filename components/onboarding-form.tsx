@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -6,9 +6,6 @@ import Image from 'next/image';
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import { StepContent } from './onboarding/step-content';
 import { Confetti } from './onboarding/confetti';
@@ -61,14 +58,37 @@ export default function OnboardingForm({ initialStacks }: { initialStacks: Stack
     setSelectedStack(stack);
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     if(intialLoading){
       intialLoading = false;
       return;
     }else{
-      handleGetLicense() 
+      handleGetLicense();
     }
   },[githubUsername]);
+
+  const checkGithubInvitationStatus = async () => {
+    try {
+      const res = await fetch('/api/onboarding/github-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ githubUsername }),
+      });
+
+      if (!res.ok) throw new Error('Failed to check invitation status');
+
+      const { status } = await res.json();
+
+      return status === 'accepted';
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to check GitHub invitation status',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
 
   const handleGithubSubmit = async (username: string) => {
     try {
@@ -103,6 +123,17 @@ export default function OnboardingForm({ initialStacks }: { initialStacks: Stack
   };
 
   const handleTeamAccess = async () => {
+    const isAccepted = await checkGithubInvitationStatus();
+    
+    if (!isAccepted) {
+      toast({
+        title: 'Warning',
+        description: 'Please accept the GitHub organization invitation before proceeding.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
       const res = await fetch('/api/onboarding/team', {
         method: 'POST',
@@ -179,7 +210,7 @@ export default function OnboardingForm({ initialStacks }: { initialStacks: Stack
                 description={step.description}
                 isCompleted={currentStep > index + 1}
                 isActive={currentStep === index + 1}
-                onComplete={handleComplete}
+                onComplete={index + 1 === 3 ? handleTeamAccess : handleComplete}
                 stacks={initialStacks}
                 selectedStack={selectedStack}
                 onStackSelect={handleStackSelect}
