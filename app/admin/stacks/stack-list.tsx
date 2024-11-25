@@ -32,17 +32,22 @@ export function StackList({ initialStacks }: { initialStacks: Stack[] }) {
         method: 'DELETE',
       });
 
-      if (!res.ok) throw new Error('Failed to delete stack');
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to delete stack');
+      }
 
+      // Only update UI if delete was successful
       setStacks(stacks.filter((stack) => stack.id !== id));
       toast({
         title: 'Success',
         description: 'Tech stack deleted successfully',
       });
     } catch (error) {
+      console.error('Error deleting stack:', error);
       toast({
         title: 'Error',
-        description: 'Failed to delete tech stack',
+        description: error instanceof Error ? error.message : 'Failed to delete tech stack',
         variant: 'destructive',
       });
     }
@@ -52,11 +57,48 @@ export function StackList({ initialStacks }: { initialStacks: Stack[] }) {
     setEditingStack(stack);
   };
 
-  const handleUpdate = (updatedStack: Stack) => {
-    setStacks(stacks.map(stack => 
-      stack.id === updatedStack.id ? updatedStack : stack
-    ));
-    setEditingStack(null);
+  const handleUpdate = async (formData: Stack) => {
+    try {
+      const res = await fetch(`/api/admin/stacks/${formData.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          icon: formData.icon,
+          discordUrl: formData.discordUrl || null,
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to update stack');
+      }
+
+      const updatedStack = await res.json();
+      
+      // Update UI with the response from server
+      setStacks(stacks.map(stack => 
+        stack.id === updatedStack.id ? updatedStack : stack
+      ));
+      
+      // Close the modal after successful update
+      setEditingStack(null);
+      
+      toast({
+        title: 'Success',
+        description: 'Tech stack updated successfully',
+      });
+      
+      return updatedStack;
+    } catch (error) {
+      console.error('Error updating stack:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to update tech stack',
+        variant: 'destructive',
+      });
+      throw error; // Re-throw to handle in the component
+    }
   };
 
   return (
