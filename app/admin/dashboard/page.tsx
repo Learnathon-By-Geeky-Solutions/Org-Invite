@@ -1,39 +1,79 @@
-import { db } from '@/lib/db';
-import { techStacks, participants, jetbrainsLicenses } from '@/lib/schema';
+'use client'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Layers, Key } from 'lucide-react';
+import { Users, Layers, Key, LucideIcon } from 'lucide-react';
+import { getParticipantsForAdmin } from './participant-action';
+import { useEffect, useState } from 'react';
 
-export default async function DashboardPage() {
-  const [
-    participantsCount,
-    stacksCount,
-    licensesCount
-  ] = await Promise.all([
-    db.select().from(participants).execute(),
-    db.select().from(techStacks).execute(),
-    db.select().from(jetbrainsLicenses).execute(),
-  ]);
+export default function DashboardPage() {
+  const [stats, setStats] = useState<{ 
+    name: string; 
+    value: number; 
+    icon: LucideIcon; 
+    color: string; 
+  }[]>([]);
+  
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const stats = [
-    {
-      name: 'Total Participants',
-      value: participantsCount.length,
-      icon: Users,
-      color: 'text-blue-600',
-    },
-    {
-      name: 'Tech Stacks',
-      value: stacksCount.length,
-      icon: Layers,
-      color: 'text-green-600',
-    },
-    {
-      name: 'Available Licenses',
-      value: licensesCount.filter(l => !l.usedBy).length,
-      icon: Key,
-      color: 'text-purple-600',
-    },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const [
+          participantsCount,
+          stacksCount,
+          licensesCount
+        ] = await getParticipantsForAdmin();
+
+        const newStats = [
+          {
+            name: 'Total Participants',
+            value: participantsCount.length,
+            icon: Users,
+            color: 'text-blue-600',
+          },
+          {
+            name: 'Tech Stacks',
+            value: stacksCount.length,
+            icon: Layers,
+            color: 'text-green-600',
+          },
+          {
+            name: 'Available Licenses',
+            //@ts-ignore
+            value: licensesCount.filter(l => !l.usedBy).length,
+            icon: Key,
+            color: 'text-purple-600',
+          },
+        ];
+        
+        setStats(newStats);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch dashboard data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (error) {
+    return (
+      <div className="p-4 text-red-600">
+        <p>Error loading dashboard: {error}</p>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="p-4">
+        <p className="text-gray-600">Loading dashboard...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -14,7 +14,7 @@ import {
 import * as Icons from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
-type Stack = {
+export type Stack = {
 	id: string;
 	name: string;
 	icon: string;
