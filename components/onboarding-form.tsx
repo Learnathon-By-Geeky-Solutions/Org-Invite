@@ -47,7 +47,7 @@ const steps = [
 let intialLoading = true;
 
 export default function OnboardingForm({ initialStacks }: { initialStacks: Stack[] }) {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(1); 
   const [selectedStack, setSelectedStack] = useState<Stack | null>(null);
   const [githubUsername, setGithubUsername] = useState('');
   const [licenseKey, setLicenseKey] = useState('NO License Available');
