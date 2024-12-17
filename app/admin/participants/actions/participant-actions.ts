@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { participantLogins } from "@/lib/schema";
+import { eq } from "drizzle-orm";
 
 export async function getParticipantLogins() {
   const logins = await db.select().from(participantLogins);
@@ -17,5 +18,14 @@ export async function addParticipant(email: string) {
     return { success: true };
   } catch (error) {
     return { success: false, error: "Failed to add participant" };
+  }
+}
+
+export async function deleteParticipant(id: string) {
+  try {
+    await db.delete(participantLogins).where(eq(participantLogins.id, id));
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: 'Failed to delete participant' };
   }
 }
