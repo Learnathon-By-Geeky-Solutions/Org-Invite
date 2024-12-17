@@ -16,8 +16,8 @@ type Stack = {
 
 const steps = [
   {
-    title: "Email Varification",
-    description: "Varify your email",
+    title: "Email verification",
+    description: "Verify your email",
   },
   {
     title: "Select Tech Stack",
