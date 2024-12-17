@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { Logo } from '@/components/ui/logo';
-import { Button } from '@/components/ui/button';
-import { useRouter, usePathname } from 'next/navigation';
+import { Logo } from "@/components/ui/logo";
+import { Button } from "@/components/ui/button";
+import { useRouter, usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Layers,
@@ -11,17 +11,19 @@ import {
   Settings,
   LogOut,
   Users,
-} from 'lucide-react';
-import Link from 'next/link';
-import { cn } from '@/lib/utils';
+  PersonStanding,
+} from "lucide-react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 const navigation = [
-  { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-  { name: 'Tech Stacks', href: '/admin/stacks', icon: Layers },
-  { name: 'Discord Servers', href: '/admin/discord', icon: MessageSquare },
-  { name: 'JetBrains Licenses', href: '/admin/licenses', icon: Key },
-  { name: 'Configuration', href: '/admin/config', icon: Settings },
-  { name: 'Administrators', href: '/admin/admins', icon: Users },
+  { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+  { name: "Tech Stacks", href: "/admin/stacks", icon: Layers },
+  { name: "Discord Servers", href: "/admin/discord", icon: MessageSquare },
+  { name: "JetBrains Licenses", href: "/admin/licenses", icon: Key },
+  { name: "Configuration", href: "/admin/config", icon: Settings },
+  { name: "Administrators", href: "/admin/admins", icon: Users },
+  { name: "Participants", href: "/admin/participants", icon: PersonStanding },
 ];
 
 export default function AdminLayout({
@@ -34,22 +36,22 @@ export default function AdminLayout({
 
   const handleLogout = async () => {
     try {
-      const res = await fetch('/api/admin/logout', { 
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/admin/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
       });
 
-      if (!res.ok) throw new Error('Logout failed');
+      if (!res.ok) throw new Error("Logout failed");
 
       // Force a hard navigation to login page to clear all state
-      window.location.href = '/admin/login';
+      window.location.href = "/admin/login";
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     }
   };
 
   // Don't show admin layout on login page
-  if (pathname === '/admin/login') {
+  if (pathname === "/admin/login") {
     return <>{children}</>;
   }
 
@@ -90,15 +92,16 @@ export default function AdminLayout({
                     key={item.name}
                     href={item.href}
                     className={cn(
-                      'flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors',
+                      "flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors",
                       isActive
-                        ? 'bg-primary text-white'
-                        : 'text-gray-600 hover:bg-gray-50'
+                        ? "bg-primary text-white"
+                        : "text-gray-600 hover:bg-gray-50"
                     )}
                   >
                     <item.icon
-                      className={cn('mr-3 h-5 w-5', 
-                        isActive ? 'text-white' : 'text-gray-400'
+                      className={cn(
+                        "mr-3 h-5 w-5",
+                        isActive ? "text-white" : "text-gray-400"
                       )}
                     />
                     {item.name}
