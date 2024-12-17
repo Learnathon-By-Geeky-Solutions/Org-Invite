@@ -26,6 +26,20 @@ export async function deleteParticipant(id: string) {
     await db.delete(participantLogins).where(eq(participantLogins.id, id));
     return { success: true };
   } catch (error) {
-    return { success: false, error: 'Failed to delete participant' };
+    return { success: false, error: "Failed to delete participant" };
+  }
+}
+
+export async function bulkAddParticipants(emails: string[]) {
+  try {
+    await db.insert(participantLogins).values(
+      emails.map((email) => ({
+        email,
+        loginCount: 0,
+      }))
+    );
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: "Failed to add participants" };
   }
 }
