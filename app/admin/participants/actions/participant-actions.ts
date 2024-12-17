@@ -43,3 +43,28 @@ export async function bulkAddParticipants(emails: string[]) {
     return { success: false, error: "Failed to add participants" };
   }
 }
+
+export async function verifyAndUpdateLoginCount(email: string) {
+  try {
+    const participant = await db
+      .select()
+      .from(participantLogins)
+      .where(eq(participantLogins.email, email))
+      .limit(1);
+
+    if (participant && participant.length > 0) {
+      // Update login count
+      await db
+        .update(participantLogins)
+        .set({
+          loginCount: participant[0].loginCount + 1,
+        })
+        .where(eq(participantLogins.email, email));
+      return { success: true };
+    }
+
+    return { success: false, error: "Email not found" };
+  } catch (error) {
+    return { success: false, error: "Failed to verify email" };
+  }
+}
